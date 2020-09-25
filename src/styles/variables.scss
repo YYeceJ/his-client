@@ -1,0 +1,8 @@
+$base-font-size:14px !default;
+$blue:blue;
+
+@mixin ellipsis{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
