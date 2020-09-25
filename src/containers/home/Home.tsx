@@ -1,16 +1,45 @@
-import React,{Component} from "react";
+import React, {Component} from "react";
+// @ts-ignore
+import {getProvinceList} from "~/api.ts​​";
 
 export interface IHomeProps {
-    
+
 }
+
 export interface IHomeState {
-    
+    provinceData: any[];
 }
-class Home extends Component<IHomeProps,IHomeState>{
-    public render(){
+
+class Home extends Component<IHomeProps, IHomeState> {
+    constructor(props: Readonly<IHomeProps>) {
+        super(props);
+        this.state = {
+            provinceData: []
+        }
+    }
+
+    public componentDidMount() {
+        getProvinceList()
+            .then((res: any[]) => {
+                this.setState(() => ({provinceData: res}));
+            })
+            .catch((err: any) => {
+                console.error(err)
+            })
+    }
+
+    public render() {
+        const {provinceData} = this.state;
         return (
             <section>
-                React Home
+                <ul>
+                    {
+                        provinceData.map((data: { provinceId: number; provinceName: string }) => (
+                                <li key={data.provinceId}>{data.provinceName}</li>
+                            )
+                        )
+                    }
+                </ul>
             </section>
         )
     }
