@@ -3,6 +3,11 @@ import webpack, {Configuration as WebpackConfiguration} from "webpack";
 import {Configuration as WebpackDevServerConfiguration} from "webpack-dev-server";
 import TsconfigPathsWebpackPlugin from "tsconfig-paths-webpack-plugin";
 import OpenBrowserPlugin from "open-browser-webpack-plugin";
+import {CleanWebpackPlugin} from "clean-webpack-plugin";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import UglifyJsPlugin from "uglifyjs-webpack-plugin";
+import OptimizeCssAssetsPlugin from "optimize-css-assets-webpack-plugin";
+import {BundleAnalyzerPlugin} from "webpack-bundle-analyzer";
 
 import * as paths from "./path.config";
 
@@ -28,10 +33,15 @@ const webpackConfig: Configuration = {
         port: 8080,
         host: "localhost",
         contentBase: paths.BUILD_DIR,
-        hot: true,
-        hotOnly: true
+        hot: true, // 开启HMR功能
+        hotOnly: true // 即使HMR没有生效，浏览器也不自动刷新
     },
     plugins: [
+        // 在为生产环境编译文件的时候，先把 build或dist (就是放生产环境用的文件) 目录里的文件先清除干净，再生成新的。
+        new CleanWebpackPlugin({
+            cleanOnceBeforeBuildPatterns: ["**/*"]
+        }),
+        // 生成html文件
         new HtmlWebpackPlugin({
             template: "./src/entries/index.html",
             minify: {
@@ -41,13 +51,32 @@ const webpackConfig: Configuration = {
             },
             hash: true
         }),
+        // 在使用时将不再需要import和require进行引入，直接使用即可。
         new webpack.ProvidePlugin({
             "React": "react",
         }),
-        new webpack.NamedChunksPlugin(),
+        // 模块热替换插件
         new webpack.HotModuleReplacementPlugin(),
+        // start后自动打开浏览器
         new OpenBrowserPlugin({
             url: "http://localhost:8080/"
+        }),
+        // css单独打包成一个文件
+        new MiniCssExtractPlugin({
+            filename: "styles/[name].[contenthash:8].css"
+        }),
+        // 打包后的内容束展示为图，openAnalyzer设置为false，不自动打开
+        new BundleAnalyzerPlugin({
+            analyzerMode: "static",
+            analyzerHost: "127.0.0.1",
+            analyzerPort: 8888,
+            reportFilename: "report.html",
+            defaultSizes: "parsed",
+            openAnalyzer: false,
+            generateStatsFile: false,
+            statsFilename: "stats.json",
+            statsOptions: null,
+            logLevel: "info"
         })
     ],
     module: {
@@ -82,11 +111,16 @@ const webpackConfig: Configuration = {
                 test: /.(css|scss)$/,
                 use: [
                     // Creates `style` nodes from JS strings
-                    'style-loader',
+                    isDev ? "style-loader" : {
+                        loader: MiniCssExtractPlugin.loader,
+                        options: {
+                            publicPath: "../"
+                        }
+                    },
                     // Translates CSS into CommonJS
-                    'css-loader',
+                    "css-loader",
                     // Compiles Sass to CSS
-                    'sass-loader',
+                    "sass-loader",
                 ]
             },
             {
@@ -124,6 +158,32 @@ const webpackConfig: Configuration = {
                 configFile: paths.SRC_DIR
             })
         ]
+    },
+
+    // 优化
+    optimization: {
+        runtimeChunk: {
+            name: "mainfest"
+        },
+        splitChunks: {
+            cacheGroups: {
+                default: false,
+                commons: {
+                    test: /[\\/]node_moudles[\\/]/,
+                    name: "vendor",
+                    chunks: "all"
+                }
+            }
+        },
+        minimizer: [
+            new UglifyJsPlugin({
+                cache: true,
+                parallel: true,
+                sourceMap: true
+            }),
+            new OptimizeCssAssetsPlugin(),
+        ]
+
     }
 };
 

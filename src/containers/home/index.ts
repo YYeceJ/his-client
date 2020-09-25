@@ -1,2 +1,3 @@
-import Home from "~/containers/home/Home";
+import Home from "./Home";
+
 export default Home;

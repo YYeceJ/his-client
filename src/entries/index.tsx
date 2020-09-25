@@ -4,9 +4,9 @@ import {HashRouter as Router,Switch,Route} from "react-router-dom";
 
 import logo from "../assets/logo.png";
 import style from "./style.scss";
-import App from "~/components/App";
-import Home from "~/containers/home";
-import Result from "~/containers/result";
+import App from "../components/App";
+import Result from "../containers/result/Result";
+import Home from "../containers/home/Home";
 function render() {
     return ReactDOM.render(
         <App>
@@ -28,6 +28,7 @@ function render() {
 render();
 
 if (module.hot){
-    module.hot.accept(["~/components/App"],render);
+    // 如果APP文件变了,更新渲染
+    module.hot.accept(["../components/App"],render);
     module.hot.accept(() => window.location.reload(true));
 }

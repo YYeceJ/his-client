@@ -1,6 +1,5 @@
 import React, {Component} from "react";
-// @ts-ignore
-import {getProvinceList} from "~/api.ts​​";
+import {getProvinceList} from "../../api";
 
 export interface IHomeProps {
 
@@ -34,7 +33,7 @@ class Home extends Component<IHomeProps, IHomeState> {
             <section>
                 <ul>
                     {
-                        provinceData.map((data: { provinceId: number; provinceName: string }) => (
+                        provinceData && provinceData.map((data: { provinceId: number; provinceName: string }) => (
                                 <li key={data.provinceId}>{data.provinceName}</li>
                             )
                         )

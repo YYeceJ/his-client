@@ -1,6 +1,6 @@
 import axios from "axios";
 import queryString from "query-string";
-import {HttpMethod,Options} from "~/core/typings";
+import {HttpMethod,Options} from "../typings";
 
 const service = axios.create({
     baseURL:"",
